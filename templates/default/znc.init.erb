@@ -8,7 +8,7 @@
 ### END INIT INFO
 
 # Original Author: Henner M. Kruse
-# Author: Seth Chisamore
+# Author: Shane da Silva
 #
 # Please remove the "Author" lines above and replace them
 # with your own name if you copy and modify this script.
@@ -20,8 +20,9 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 DESC="znc, an advanced modular IRC bouncer"
 NAME=znc
 DAEMON=$(which $NAME)
-DAEMON_ARGS="-d /etc/znc"
-PIDFILE=/var/run/$NAME.pid
+DAEMON_ARGS="--foreground --datadir <%= node['znc']['data_dir'] %>"
+PIDDIR=/var/run/$NAME
+PIDFILE=$PIDDIR/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 USER=<%= node['znc']['user'] %>
 GROUP=<%= node['znc']['group'] %>
@@ -42,28 +43,23 @@ VERBOSE=yes
 # Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
 . <%= node['znc']['init']['functions'] %>
 
-#
-# Function that starts the daemon/service
-#
+# Starts the service
 do_start()
 {
   # Return
   #   0 if daemon has been started
   #   1 if daemon was already running
   #   2 if daemon could not be started
-  start-stop-daemon --start --quiet --chuid $USER:$GROUP --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
-    || return 1
-    start-stop-daemon --start --quiet --chuid $USER:$GROUP --pidfile $PIDFILE --exec $DAEMON -- \
-  $DAEMON_ARGS \
-    || return 2
-  # Add code here, if necessary, that waits for the process to be ready
-  # to handle requests from services started subsequently which depend
-  # on this one.  As a last resort, sleep for some time.
+  mkdir -p $PIDDIR
+  chown $USER:$GROUP $PIDDIR
+
+  start-stop-daemon --start --background --quiet --chuid $USER:$GROUP \
+    --pidfile $PIDFILE --make-pidfile --exec $DAEMON --test > /dev/null || return 1
+  start-stop-daemon --start --background --quiet --chuid $USER:$GROUP \
+    --pidfile $PIDFILE --make-pidfile --exec $DAEMON -- $DAEMON_ARGS || return 2
 }
 
-#
-# Function that stops the daemon/service
-#
+# Stops the service
 do_stop()
 {
   # Return
@@ -87,9 +83,7 @@ do_stop()
   return "$RETVAL"
 }
 
-#
-# Function that sends a SIGHUP to the daemon/service
-#
+# Sends a SIGHUP to the service
 do_reload() {
   #
   # If the daemon can reload its configuration without
@@ -101,8 +95,11 @@ do_reload() {
 }
 
 case "$1" in
+  status)
+  status_of_proc -p $PIDFILE "$DAEMON" "$NAME" && exit 0 || exit $?
+  ;;
   start)
-  log_daemon_msg "Starting $DESC" "$NAME"
+  log_daemon_msg "Starting $NAME" "$NAME"
   do_start
   case "$?" in
     0|1) log_end_msg 0 ;;
@@ -110,7 +107,7 @@ case "$1" in
   esac
   ;;
   stop)
-  log_daemon_msg "Stopping $DESC" "$NAME"
+  log_daemon_msg "Stopping $NAME" "$NAME"
   do_stop
   case "$?" in
     0|1) log_end_msg 0 ;;
@@ -122,7 +119,7 @@ case "$1" in
   # If the "reload" option is implemented then remove the
   # 'force-reload' alias
   #
-  log_daemon_msg "Restarting $DESC" "$NAME"
+  log_daemon_msg "Restarting $NAME" "$NAME"
   do_stop
   case "$?" in
     0|1)
@@ -140,8 +137,7 @@ case "$1" in
   esac
   ;;
   *)
-  #echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
-  echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+  echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|status}" >&2
   exit 3
   ;;
 esac
