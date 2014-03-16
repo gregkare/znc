@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# znc - this script starts and stops the znc daemon
+#
+# chkconfig:   - 85 15
+# description:  znc is an IRC bouncer
+# processname: znc
+# config:      <%= node['znc']['data_dir'] %>/configs/znc.conf
+# pidfile:     /var/run/znc/znc.pid
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
+
+znc=$(which znc)
+prog="znc"
+
+DAEMON_ARGS="--datadir <%= node['znc']['data_dir'] %>"
+
+lockfile=/var/lock/subsys/$prog
+
+start() {
+    [ -x $znc ] || exit 5
+    echo -n $"Starting $prog: "
+    daemon --user <%= node['znc']['user'] %> $znc $DAEMON_ARGS
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog -QUIT
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    echo -n $"Reloading $prog: "
+    killproc $znc -HUP
+    RETVAL=$?
+    echo
+}
+
+rh_status() {
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart|configtest)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    status)
+        rh_status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|reload}"
+        exit 2
+esac

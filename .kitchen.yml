@@ -6,20 +6,15 @@ driver_config:
 
 platforms:
   - name: ubuntu-13.10
+  - name: ubuntu-12.10
     run_list:
       - recipe[apt]
-  - name: ubuntu-12.10
-      run_list:
-        - recipe[apt]
   - name: ubuntu-12.04
-      run_list:
-        - recipe[apt]
-  - name: ubuntu-10.04
-      run_list:
-        - recipe[apt]
+    run_list:
+      - recipe[apt]
   - name: centos-6.4
     run_list:
-      - recipe[yum::epel]
+      recipe[yum-epel]
 
 suites:
   - name: default
