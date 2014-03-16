@@ -54,15 +54,13 @@ template '/etc/init.d/znc' do
   mode '0755'
 end
 
-users = search(:users, 'groups:znc')
-
 template "#{node['znc']['data_dir']}/configs/znc.conf" do
   source 'znc.conf.erb'
   mode 0600
   owner node['znc']['user']
   group node['znc']['group']
   variables(
-    :users => users
+    :users => node['znc']['users']
   )
   notifies :reload, 'service[znc]'
 end

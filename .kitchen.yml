@@ -25,4 +25,13 @@ suites:
   - name: default
     run_list:
       - recipe[znc]
-    attributes: {}
+    attributes:
+      znc:
+        users:
+          - id: john
+            comment: John Connor
+            znc:
+              pass: hunter2
+              ident: hunter@example.com
+              alt_nick: dude
+              server: chat.freenode.net +7000
