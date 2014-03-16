@@ -25,7 +25,7 @@ LoadModule   = <%= "#{mod} #{params}".strip  %>
 	AltNick = <%= u['znc']['alt_nick'] || "#{u['id']}_" %>
 	Ident = <%= u['znc']['ident'] %>
 	RealName = <%= u['znc']['real_name'] || u['comment'] %>
-	QuitMsg = <%= u['znc']['quit_msg'] || 'ZNC (managed by Opscode Chef)' %>
+	QuitMsg = <%= u['znc']['quit_msg'] || 'Goodbye' %>
 	ChanModes = <%= u['znc']['chan_modes'] || '+stn' %>
 	Buffer = <%= u['znc']['buffer'] || 50 %>
 	KeepBuffer = <%= u['znc']['keep_buffer'] || false %>

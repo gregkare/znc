@@ -15,17 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-default['znc']['install_method'] = 'package'
+set['znc']['data_dir'] = '/etc/znc'
+set['znc']['user'] = 'znc'
+set['znc']['group'] = 'znc'
 
-case node["platform"]
-when "macosx"
-  set['znc']['data_dir'] = '$HOME/.znc'
+if node.platform_family?('rhel')
+  set['znc']['init']['functions'] = '/etc/rc.d/init.d/functions'
 else
-  set['znc']['data_dir'] = '/etc/znc'
-  set['znc']['user'] = 'znc'
-  set['znc']['group'] = 'znc'
+  set['znc']['init']['functions'] = '/lib/lsb/init-functions'
 end
 
 default['znc']['conf_dir']        = "#{znc['data_dir']}/configs"
@@ -33,7 +31,7 @@ default['znc']['log_dir']         = "#{znc['data_dir']}/moddata/adminlog"
 default['znc']['module_dir']      = "#{znc['data_dir']}/modules"
 default['znc']['users_dir']       = "#{znc['data_dir']}/users"
 
-default['znc']['port']            = "+7777"
-default['znc']['skin']            = "dark-clouds"
+default['znc']['port']            = '+7777'
+default['znc']['skin']            = 'dark-clouds'
 default['znc']['max_buffer_size'] = 500
-default['znc']['modules']         = %w{ webadmin adminlog }
+default['znc']['modules']         = %w[webadmin adminlog]

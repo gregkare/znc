@@ -15,17 +15,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-include_recipe "znc::#{node['znc']['install_method']}"
+include_recipe 'znc::package'
 
 user node['znc']['user']
 group node['znc']['group']
 
-[ node['znc']['data_dir'],
+[
+  node['znc']['data_dir'],
   node['znc']['conf_dir'],
   node['znc']['module_dir'],
-  node['znc']['users_dir']
+  node['znc']['users_dir'],
 ].each do |dir|
   directory dir do
     owner node['znc']['user']
@@ -33,7 +33,7 @@ group node['znc']['group']
   end
 end
 
-bash "generate-pem" do
+bash 'generate-pem' do
   cwd node['znc']['data_dir']
   code <<-EOH
   umask 077
@@ -47,40 +47,30 @@ bash "generate-pem" do
   creates "#{node['znc']['data_dir']}/znc.pem"
 end
 
-template "/etc/init.d/znc" do
-  source "znc.init.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-end
-
-service "znc" do
-  supports :restart => true
-  action [:enable, :start]
+template '/etc/init.d/znc' do
+  source 'znc.init.erb'
+  owner 'root'
+  group 'root'
+  mode '0755'
 end
 
 users = search(:users, 'groups:znc')
 
-# znc doesn't like to be automated...this prevents a race condition
-# http://wiki.znc.in/Configuration#Editing_config
-execute "force-save-znc-config" do
-  command "pkill -SIGUSR1 znc"
-  action :run
-end
-execute "reload-znc-config" do
-  command "pkill -SIGHUP znc"
-  action :nothing
-end
-
-# render znc.conf
 template "#{node['znc']['data_dir']}/configs/znc.conf" do
-  source "znc.conf.erb"
+  source 'znc.conf.erb'
   mode 0600
   owner node['znc']['user']
   group node['znc']['group']
   variables(
     :users => users
   )
-  notifies :run, "execute[reload-znc-config]", :immediately
+  notifies :reload, 'service[znc]'
 end
 
+service 'znc' do
+  supports :restart => true, :reload => true
+  # znc doesn't like to be automated...this prevents a race condition
+  # http://wiki.znc.in/Configuration#Editing_config
+  reload_command 'pkill -SIGUSR1 znc && pkill -SIGHUP znc'
+  action [:enable, :start]
+end
