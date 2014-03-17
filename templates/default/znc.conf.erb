@@ -6,16 +6,22 @@
 // Buf if you feel risky, you might want to read help on /znc saveconfig and /znc rehash.
 // Also check http://en.znc.in/wiki/Configuration
 
-AnonIPLimit  = 10
-MaxBufferSize= <%= node['znc']['max_buffer_size'] %>
-SSLCertFile  = <%= node['znc']['data_dir'] %>/znc.pem
-Listener4    = <%= node['znc']['port'] %>
-ConnectDelay = 5
-ServerThrottle = 30
-Skin         = <%= node['znc']['skin'] %>
-StatusPrefix = *
-<% node['znc']['modules'].each do |mod,params| -%>
-LoadModule   = <%= "#{mod} #{params}".strip  %>
+AnonIPLimit    = <%= node['znc']['anon_ip_limit'] %>
+ConnectDelay   = <%= node['znc']['connect_delay'] %>
+MaxBufferSize  = <%= node['znc']['max_buffer_size'] %>
+<% if node['znc']['motd'] %>
+Motd           = <%= node['znc']['motd'] %>
+<% end -%>
+ServerThrottle = <%= node['znc']['server_throttle'] %>
+Skin           = <%= node['znc']['skin'] %>
+SSLCertFile    = <%= node['znc']['data_dir'] %>/znc.pem
+StatusPrefix   = <%= node['znc']['status_prefix'] %>
+
+Listener4      = <%= node['znc']['port'] %>
+
+// Global modules loaded on startup
+<% node['znc']['modules'].each do |mod, params| -%>
+LoadModule = <%= "#{mod} #{params}".strip %>
 <% end -%>
 
 <% @users.each do |u| %>
