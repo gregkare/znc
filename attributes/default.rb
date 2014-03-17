@@ -16,6 +16,11 @@ default['znc']['server_throttle'] = 30
 default['znc']['skin']            = 'dark-clouds'
 default['znc']['status_prefix']   = '*'
 
-default['znc']['port']            = '+7777'
+default['znc']['listeners'] = [
+  {
+    'port'      => 7777,
+    'ssl'	=> true,
+  },
+]
 
-default['znc']['modules']         = %w[webadmin adminlog]
+default['znc']['modules'] = %w[webadmin adminlog]
