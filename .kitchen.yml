@@ -23,10 +23,13 @@ suites:
     attributes:
       znc:
         users:
-          - id: john
+          - nick: john
             comment: John Connor
             znc:
-              pass: hunter2
-              ident: hunter@example.com
-              alt_nick: dude
-              server: chat.freenode.net +7000
+              pass: 'sha256#47010baf2777cb2cf6acc0e0acdd592e069932d622dee54f6bcc5305f7cde26e#NqMc!xAM4cUYVX09-OBq#'
+              alt_nick: jonny
+              networks:
+                - name: chat
+                  server: chat.freenode.net +7000
+                  channels:
+                    - name: random

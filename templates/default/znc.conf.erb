@@ -1,4 +1,4 @@
-// Managed by Chef
+// Configures the ZNC IRC bouncer.
 //
 // See http://en.znc.in/wiki/Configuration
 
@@ -8,19 +8,19 @@ ConnectDelay   = <%= node['znc']['connect_delay'] %>
 MaxBufferSize  = <%= node['znc']['max_buffer_size'] %>
 <% if node['znc']['motd'] %>
 Motd           = <%= node['znc']['motd'] %>
-<% end -%>
+<% end %>
 ServerThrottle = <%= node['znc']['server_throttle'] %>
 Skin           = <%= node['znc']['skin'] %>
 SSLCertFile    = <%= node['znc']['data_dir'] %>/znc.pem
 StatusPrefix   = <%= node['znc']['status_prefix'] %>
 
 // Global modules loaded on startup
-<% node['znc']['modules'].each do |mod, params| -%>
+<% node['znc']['modules'].each do |mod, params| %>
 LoadModule = <%= "#{mod} #{params}".strip %>
-<% end -%>
+<% end %>
 
 // Ports to listen on
-<% node['znc']['listeners'].each_with_index do |listener, index| -%>
+<% node['znc']['listeners'].each_with_index do |listener, index| %>
 <Listener <%= listener['name'] || "listener#{index}" %>>
   AllowIRC = <%= listener.fetch('allow_irc', true) %>
   AllowWeb = <%= listener.fetch('allow_web', true) %>
@@ -29,41 +29,44 @@ LoadModule = <%= "#{mod} #{params}".strip %>
   Port     = <%= listener['port'] %>
   SSL      = <%= listener.fetch('ssl', true) %>
 </Listener>
-<% end -%>
+<% end %>
 
 <% node['znc']['users'].each do |u| %>
 <% u['znc'] ||= {} %>
 <User <%= u['id'] || u['znc']['nick'] %>>
-  Admin             = <%= u['znc'].fetch('admin', false) %>
-  Allow             = *
-  AltNick           = <%= u['znc']['alt_nick'] || "#{u['znc']['nick']}_" %>
-  AppendTimestamp   = <%= u['znc'].fetch('append_timestamp', false) %>
-  Buffer            = <%= u['znc']['buffer'] || 500 %>
-  ChanModes         = <%= u['znc']['chan_modes'] || '+stn' %>
-  Ident             = <%= u['znc']['ident'] %>
-  JoinTries         = <%= u['znc']['join_tries'] || 10 %>
-  KeepBuffer        = <%= u['znc']['keep_buffer'] || false %>
-  MaxJoins          = <%= u['znc']['max_joins'] || 5 %>
-  MultiClients      = <%= u['znc'].fetch('multi_clients', true) %>
-  Nick              = <%= u['znc']['nick'] || u['id'] %>
-  Pass              = <%= u['znc']['pass'] %>
-  PrependTimestamp  = <%= u['znc'].fetch('prepend_timestamp', true) %>
-  QuitMsg           = <%= u['znc']['quit_msg'] || 'Goodbye' %>
-  RealName          = <%= u['znc']['real_name'] || u['comment'] %>
-  TimestampFormat   = <%= u['znc']['timestamp_format'] || '[%H:%M:%S]' %>
-  TimezoneOffset    = <%= u['znc']['timezone_offset'] || '0.00' %>
+  Admin               = <%= u['znc'].fetch('admin', false) %>
+  Allow               = *
+  AltNick             = <%= u['znc']['alt_nick'] || "#{u['znc']['nick']}_" %>
+  AppendTimestamp     = <%= u['znc'].fetch('append_timestamp', false) %>
+  AutoClearChanBuffer = <%= u['znc'].fetch('auto_clear_chan_buffer', true) %>
+  Buffer              = <%= u['znc']['buffer'] || 500 %>
+  ChanModes           = <%= u['znc']['chan_modes'] || '+stn' %>
+  Ident               = <%= u['znc']['ident'] || u['znc']['nick'] || u['id'] %>
+  JoinTries           = <%= u['znc']['join_tries'] || 10 %>
+  KeepBuffer          = <%= u['znc']['keep_buffer'] || false %>
+  MaxJoins            = <%= u['znc']['max_joins'] || 5 %>
+  MultiClients        = <%= u['znc'].fetch('multi_clients', true) %>
+  Nick                = <%= u['znc']['nick'] || u['id'] %>
+  Pass                = <%= u['znc']['pass'] %>
+  PrependTimestamp    = <%= u['znc'].fetch('prepend_timestamp', true) %>
+  QuitMsg             = <%= u['znc']['quit_msg'] || 'Goodbye' %>
+  RealName            = <%= u['znc']['real_name'] || u['comment'] %>
+  TimestampFormat     = <%= u['znc']['timestamp_format'] || '[%H:%M:%S]' %>
+  TimezoneOffset      = <%= u['znc']['timezone_offset'] || '0.00' %>
 
-  // User modules
-  <% Array(u['znc']['modules']).each do |mod, params| -%>
+  <% Array(u['znc']['modules']).each do |mod, params| %>
   LoadModule = <%= "#{mod} #{params}".strip  %>
-  <% end -%>
+  <% end %>
 
-  Server = <%= u['znc']['server'] %>
+  <% Array(u['znc']['networks']).each do |network| %>
+  <Network <%= network['name'] %>>
+    Server = <%= network['server'] %>
 
-  // User channels
-  <% Array(u['znc']['channels']).each do |chan, options| -%>
-  <Chan <%= chan %>>
-  </Chan>
-  <% end -%>
+    <% Array(network['channels']).each do |channel| %>
+    <Chan <%= channel['name'] %>>
+    </Chan>
+    <% end %>
+  </Network>
+  <% end %>
 </User>
-<% end -%>
+<% end %>
