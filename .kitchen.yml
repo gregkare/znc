@@ -24,7 +24,7 @@ suites:
       znc:
         users:
           - nick: john
-            comment: John Connor
+            real_name: John Connor
             znc:
               pass: 'sha256#47010baf2777cb2cf6acc0e0acdd592e069932d622dee54f6bcc5305f7cde26e#NqMc!xAM4cUYVX09-OBq#'
               alt_nick: jonny
