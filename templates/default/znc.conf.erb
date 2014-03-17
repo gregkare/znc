@@ -31,42 +31,39 @@ LoadModule = <%= "#{mod} #{params}".strip %>
 </Listener>
 <% end -%>
 
-<% @users.each do |u| %>
-<User <%= u['znc']['nick'] || u['id']  %>>
-	Pass = <%= u['znc']['pass'] %>
-	Nick = <%= u['znc']['nick'] || u['id'] %>
-	AltNick = <%= u['znc']['alt_nick'] || "#{u['id']}_" %>
-	Ident = <%= u['znc']['ident'] %>
-	RealName = <%= u['znc']['real_name'] || u['comment'] %>
-	QuitMsg = <%= u['znc']['quit_msg'] || 'Goodbye' %>
-	ChanModes = <%= u['znc']['chan_modes'] || '+stn' %>
-	Buffer = <%= u['znc']['buffer'] || 50 %>
-	KeepBuffer = <%= u['znc']['keep_buffer'] || false %>
-	MultiClients = true
-	BounceDCCs = true
-	DenyLoadMod = false
-	Admin = true
-	DenySetBindHost = false
-	DCCLookupMethod = default
-	TimestampFormat = [%H:%M:%S]
-	AppendTimestamp = false
-	PrependTimestamp = true
-	TimezoneOffset = <%= u['znc']['timezone_offset'] || '0.00' %>
-	JoinTries = 10
-	MaxJoins = 5
-	IRCConnectEnabled = true
+<% node['znc']['users'].each do |u| %>
+<% u['znc'] ||= {} %>
+<User <%= u['id'] || u['znc']['nick'] %>>
+  Admin             = <%= u['znc'].fetch('admin', false) %>
+  Allow             = *
+  AltNick           = <%= u['znc']['alt_nick'] || "#{u['znc']['nick']}_" %>
+  AppendTimestamp   = <%= u['znc'].fetch('append_timestamp', false) %>
+  Buffer            = <%= u['znc']['buffer'] || 500 %>
+  ChanModes         = <%= u['znc']['chan_modes'] || '+stn' %>
+  Ident             = <%= u['znc']['ident'] %>
+  JoinTries         = <%= u['znc']['join_tries'] || 10 %>
+  KeepBuffer        = <%= u['znc']['keep_buffer'] || false %>
+  MaxJoins          = <%= u['znc']['max_joins'] || 5 %>
+  MultiClients      = <%= u['znc'].fetch('multi_clients', true) %>
+  Nick              = <%= u['znc']['nick'] || u['id'] %>
+  Pass              = <%= u['znc']['pass'] %>
+  PrependTimestamp  = <%= u['znc'].fetch('prepend_timestamp', true) %>
+  QuitMsg           = <%= u['znc']['quit_msg'] || 'Goodbye' %>
+  RealName          = <%= u['znc']['real_name'] || u['comment'] %>
+  TimestampFormat   = <%= u['znc']['timestamp_format'] || '[%H:%M:%S]' %>
+  TimezoneOffset    = <%= u['znc']['timezone_offset'] || '0.00' %>
 
-	Allow = *
-
-  <% Array(u['znc']['modules']).each do |mod,params| -%>
-	LoadModule = <%= "#{mod} #{params}".strip  %>
+  // User modules
+  <% Array(u['znc']['modules']).each do |mod, params| -%>
+  LoadModule = <%= "#{mod} #{params}".strip  %>
   <% end -%>
 
-	Server = <%= u['znc']['server'] %>
-<% Array(u['znc']['channels']).each do |chan,options| -%>
+  Server = <%= u['znc']['server'] %>
 
-	<Chan <%= chan %>>
-	</Chan>
-<% end -%>
+  // User channels
+  <% Array(u['znc']['channels']).each do |chan, options| -%>
+  <Chan <%= chan %>>
+  </Chan>
+  <% end -%>
 </User>
 <% end -%>
