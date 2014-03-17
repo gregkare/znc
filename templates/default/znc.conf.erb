@@ -39,7 +39,9 @@ LoadModule = <%= "#{mod} #{params}".strip %>
   AltNick             = <%= u['znc']['alt_nick'] || "#{u['znc']['nick']}_" %>
   AppendTimestamp     = <%= u['znc'].fetch('append_timestamp', false) %>
   AutoClearChanBuffer = <%= u['znc'].fetch('auto_clear_chan_buffer', true) %>
-  Buffer              = <%= u['znc']['buffer'] || 500 %>
+  <% if u['znc']['buffer'] %>
+  Buffer              = <%= u['znc']['buffer'] %>
+  <% end %>
   ChanModes           = <%= u['znc']['chan_modes'] || '+stn' %>
   Ident               = <%= u['znc']['ident'] || u['znc']['nick'] || u['id'] %>
   JoinTries           = <%= u['znc']['join_tries'] || 10 %>
