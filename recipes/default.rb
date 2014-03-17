@@ -33,18 +33,27 @@ group node['znc']['group']
   end
 end
 
-bash 'generate-pem' do
-  cwd node['znc']['data_dir']
-  code <<-EOH
-  umask 077
-  openssl genrsa 2048 > znc.key
-  openssl req -subj /C=US/ST=Several/L=Locality/O=Example/OU=Operations/CN=#{node['fqdn']}/emailAddress=znc@#{node['fqdn']} \
-   -new -x509 -nodes -sha1 -days 3650 -key znc.key > znc.crt
-  cat znc.key znc.crt > znc.pem
-  EOH
-  user node['znc']['user']
-  group node['znc']['grouip']
-  creates "#{node['znc']['data_dir']}/znc.pem"
+if node['znc']['certificate']
+  file "#{node['znc']['data_dir']}/znc.pem" do
+    content node['znc']['certificate']
+    mode 0400
+    user node['znc']['user']
+    group node['znc']['group']
+  end
+else
+  bash 'generate-pem' do
+    cwd node['znc']['data_dir']
+    code <<-EOH
+    umask 077
+    openssl genrsa 2048 > znc.key
+    openssl req -subj /C=US/ST=Several/L=Locality/O=Example/OU=Operations/CN=#{node['fqdn']}/emailAddress=znc@#{node['fqdn']} \
+     -new -x509 -nodes -sha1 -days 3650 -key znc.key > znc.crt
+    cat znc.key znc.crt > znc.pem
+    EOH
+    user node['znc']['user']
+    group node['znc']['grouip']
+    creates "#{node['znc']['data_dir']}/znc.pem"
+  end
 end
 
 template '/etc/init.d/znc' do
