@@ -60,15 +60,11 @@ LoadModule = <%= "#{mod} #{params}".strip %>
   LoadModule = <%= "#{mod} #{params}".strip  %>
   <% end %>
 
-  <% Array(u['znc']['networks']).each do |network| %>
-  <Network <%= network['name'] %>>
-    Server = <%= network['server'] %>
+  Server = <%= u['znc']['server'] %>
 
-    <% Array(network['channels']).each do |channel| %>
-    <Chan <%= channel['name'] %>>
-    </Chan>
-    <% end %>
-  </Network>
+  <% Array(u['znc']['channels']).each do |channel| %>
+  <Chan <%= channel['name'] %>>
+  </Chan>
   <% end %>
 </User>
 <% end %>
