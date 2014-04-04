@@ -38,7 +38,6 @@ LoadModule = <%= "#{mod} #{params}".strip %>
   Allow               = *
   AltNick             = <%= u['znc']['alt_nick'] || "#{u['znc']['nick']}_" %>
   AppendTimestamp     = <%= u['znc'].fetch('append_timestamp', false) %>
-  AutoClearChanBuffer = <%= u['znc'].fetch('auto_clear_chan_buffer', true) %>
   <% if u['znc']['buffer'] %>
   Buffer              = <%= u['znc']['buffer'] %>
   <% end %>
