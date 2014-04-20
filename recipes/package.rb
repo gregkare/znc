@@ -24,6 +24,10 @@ znc_pkgs = value_for_platform(
   'default' => %w[znc znc-devel]
 )
 
+if platform?('ubuntu') && node['platform_version'].to_f == 14.04
+  znc_pkgs.delete 'znc-extra'
+end
+
 znc_pkgs.each do |pkg|
   package pkg do
     action :install
